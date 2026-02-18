@@ -1,0 +1,16 @@
+# Write your MySQL query statement below
+
+with new as(
+select customer_id, 
+    sum(case when transaction_type="purchase" then 1 else 0 end) as cnt_purchase,
+    sum(case when transaction_type="refund" then 1 else 0 end) as cnt_refund,
+    coalesce(sum(case when transaction_type="refund" then 1 else 0 end)*100/count(transaction_type), 0) as refund_rate,
+    datediff(max(transaction_date), min(transaction_date)) diff,
+    count(transaction_type) as total_transaction
+from customer_transactions
+group by customer_id)
+
+select customer_id from new
+where cnt_purchase>=3 
+    and refund_rate<20 
+    and diff>=30
